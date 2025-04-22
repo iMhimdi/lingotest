@@ -3,8 +3,8 @@ import { useEffect } from "react";
 
 declare global {
     interface Window {
-        Intercom: any; // Adjust 'any' to a more specific type if available
-        intercomSettings: any; // Adjust 'any' to a more specific type if available
+        Intercom: unknown; // Use unknown instead of any
+        intercomSettings: unknown; // Use unknown instead of any
     }
 }
 
@@ -12,6 +12,9 @@ interface IntercomClientComponentProps {
     userId?: string;
     userEmail?: string;
 }
+
+// Define a type for the Intercom function
+type IntercomFunction = (command: string, settings?: unknown) => void;
 
 const IntercomClientComponent: React.FC<IntercomClientComponentProps> = ({ userId, userEmail }) => {
     useEffect(() => {
@@ -22,11 +25,14 @@ const IntercomClientComponent: React.FC<IntercomClientComponentProps> = ({ userI
             email: userEmail,
         };
 
+        // Assign settings (still potentially 'any' depending on specific needs, but 'unknown' is safer start)
         window.intercomSettings = settings;
 
-        if (window.Intercom) {
-            window.Intercom('reattach_activator');
-            window.Intercom('update', settings);
+        // Type guard to check if Intercom exists and is callable
+        if (typeof window.Intercom === 'function') {
+            const intercom = window.Intercom as IntercomFunction; // Assert type
+            intercom('reattach_activator');
+            intercom('update', settings);
         } else {
             // Check if the script already exists to avoid adding it multiple times
             const existingScript = document.querySelector('script[src="https://widget.intercom.io/widget/pdo0qly5"]');
@@ -41,8 +47,9 @@ const IntercomClientComponent: React.FC<IntercomClientComponentProps> = ({ userI
         // Cleanup function to shutdown Intercom when the component unmounts or user logs out
         return () => {
             // Optional: You might want to shut down Intercom on logout or unmount
-            // if (window.Intercom) {
-            //     window.Intercom('shutdown');
+            // if (typeof window.Intercom === 'function') {
+            //     const intercom = window.Intercom as IntercomFunction;
+            //     intercom('shutdown');
             // }
         };
     }, [userId, userEmail]); // Rerun effect if userId or userEmail changes

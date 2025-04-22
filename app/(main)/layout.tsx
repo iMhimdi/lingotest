@@ -1,10 +1,11 @@
 import type { PropsWithChildren } from "react";
+
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import IntercomClientComponent from "@/components/IntercomClientComponent";
 import { MobileHeader } from "@/components/mobile-header";
 import { Sidebar } from "@/components/sidebar";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const MainLayout = async ({ children }: PropsWithChildren) => {
   // Fetch user data on the server
